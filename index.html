@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:,">
+<title>広告モニターダッシュボード</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800;900&family=Inter:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF1F5; --card:#fff; --card2:#F7F8FA; --ink:#172033; --muted:#6B7688; --line:#E2E7EF;
+  --orange:#E85A17; --orange-bg:#FFF1E8; --teal:#0E9B7A; --blue:#2F7CF6; --amber:#D99A00; --purple:#7C4DDB;
+  --red:#D92D20; --red-bg:#FFF0EF; --yellow-bg:#FFFBEB; --green-bg:#ECFDF3;
+  --shadow:0 1px 3px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.04);
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#0F141D;--card:#171E2B;--card2:#1E2738;--ink:#EEF2F7;--muted:#98A3B5;--line:#2A3548;--orange-bg:#2E1E14;--red-bg:#2E1715;--yellow-bg:#2A2410;--green-bg:#12291E;--shadow:none}
+}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans JP",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--orange);text-decoration:none}
+.wrap{max-width:1240px;margin:0 auto;padding:18px 16px 40px}
+.period-hero{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 22px 18px;box-shadow:var(--shadow)}
+.period-label{font-size:12px;letter-spacing:.14em;font-weight:800;color:var(--orange);text-transform:uppercase}
+.period-big{font-size:clamp(24px,5.2vw,38px);line-height:1.25;font-weight:900;letter-spacing:-.02em;margin:8px 0 6px}
+.period-big span{white-space:nowrap}
+.period-sub{color:var(--muted);font-size:13px;display:flex;flex-wrap:wrap;gap:8px 16px}
+.badge{display:inline-flex;align-items:center;gap:6px;background:var(--green-bg);color:#067647;border:1px solid #ABEFC6;padding:4px 9px;border-radius:999px;font-weight:700;font-size:12px}
+.controls{margin-top:18px;border-top:1px solid var(--line);padding-top:16px;display:grid;gap:12px}
+.presets{display:flex;flex-wrap:wrap;gap:8px}
+.preset{border:1px solid var(--line);background:var(--card2);color:var(--ink);padding:9px 14px;border-radius:999px;font-weight:700;font-size:13px;cursor:pointer}
+.preset.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.date-row{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.field{display:grid;gap:5px}.field label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em}
+.field input,.field select{height:42px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);padding:0 11px;font:inherit;font-size:14px}
+.btn{height:42px;border:0;border-radius:10px;padding:0 18px;font-weight:800;cursor:pointer}
+.btn-primary{background:var(--orange);color:#fff}.btn-ghost{background:var(--card2);border:1px solid var(--line);color:var(--ink)}
+.notice{display:none;margin-top:12px;background:var(--yellow-bg);border:1px solid #FDE68A;border-radius:10px;padding:11px 13px;font-size:13px;line-height:1.6}
+.notice.show{display:block}
+.alerts{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow)}
+.alerts h2{margin:0 0 10px;font-size:15px}
+.alert{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:13.5px;line-height:1.6}
+.alert:first-of-type{border-top:0}
+.dot{width:9px;height:9px;border-radius:50%;margin-top:7px;flex:none}.dot.red{background:var(--red)}.dot.amber{background:#F79009}.dot.blue{background:var(--blue)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow);min-height:168px}
+.kpi.wide{grid-column:span 1}.kpi.accent-orange{background:#FDE8D7}.kpi.accent-lav{background:#E9E2FF}
+@media(prefers-color-scheme:dark){.kpi.accent-orange,.kpi.accent-lav{background:var(--card)}}
+.kpi-head{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:15px}
+.icon{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:18px;color:#fff;flex:none}
+.kpi-num{font-size:32px;font-weight:900;letter-spacing:-.03em;margin:12px 0 4px;font-family:Inter,"Noto Sans JP",sans-serif}
+.kpi-num small{font-size:16px}
+.diff{font-size:12px;color:var(--muted)} .diff b{background:var(--card2);border:1px solid var(--line);padding:2px 7px;border-radius:999px;color:var(--ink)}
+.mini{margin-top:12px;background:var(--card2);border-radius:10px;padding:10px 12px;font-size:13px}
+.mini-row{display:flex;justify-content:space-between;padding:3px 0}
+.progress{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:8px}.progress i{display:block;height:100%;background:var(--orange);width:62%}
+.section{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow)}
+.section h2{margin:0;font-size:17px}.section p.lead{color:var(--muted);font-size:13px;margin:6px 0 0;line-height:1.7}
+.table-wrap{margin-top:14px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-size:11px;letter-spacing:.06em;color:var(--muted);padding:10px 10px;border-bottom:2px solid var(--line);white-space:nowrap}
+td{padding:14px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.acct{font-weight:800;line-height:1.4}.plat{font-size:11px;font-weight:800;letter-spacing:.05em;padding:2px 7px;border-radius:99px;display:inline-block;margin-bottom:4px}
+.plat.meta{background:#E8F0FE;color:#175CD3}.plat.google{background:#FEF3C7;color:#93370D}
+.status{font-size:12px;font-weight:700}.status.on{color:#067647}.status.off{color:var(--red)}
+.breakdown{min-width:240px}
+.bd-row{display:grid;grid-template-columns:86px 1fr auto;gap:8px;align-items:center;padding:5px 0;font-size:12.5px}
+.bd-name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bd-bar{height:7px;background:var(--line);border-radius:99px;overflow:hidden}.bd-bar i{display:block;height:100%;background:var(--orange)}
+.bd-bar i.b2{background:var(--blue)}.bd-bar i.b3{background:var(--teal)}.bd-bar i.b4{background:var(--amber)}
+.bd-meta{color:var(--muted);font-size:11px;white-space:nowrap}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.subcard{border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--card)}
+.subcard h3{margin:0 0 4px;font-size:14px}.subcard .cap{font-size:12px;color:var(--muted);margin-bottom:10px}
+.subcard table{font-size:12.5px}.subcard td,.subcard th{padding:8px 6px}
+.notes{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+.note{background:var(--card2);border-radius:12px;padding:14px;font-size:13px;line-height:1.7}.note b{display:block;margin-bottom:4px}
+.footer{margin-top:16px;color:var(--muted);font-size:12px;line-height:1.8;text-align:center}
+.mobile-cards{display:none}
+@media(max-width:900px){.kpis{grid-template-columns:1fr 1fr}.grid2,.notes{grid-template-columns:1fr}}
+@media(max-width:640px){
+  .wrap{padding:12px 10px 32px}.kpis{grid-template-columns:1fr 1fr;gap:10px}.kpi{min-height:auto;padding:14px}.kpi-num{font-size:26px}
+  .table-wrap{display:none}.mobile-cards{display:grid;gap:12px;margin-top:14px}
+  .mcard{border:1px solid var(--line);border-radius:14px;padding:14px}.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}.mgrid div{background:var(--card2);border-radius:10px;padding:8px}.mgrid span{display:block;font-size:11px;color:var(--muted)}.mgrid strong{font-size:15px}
+  .breakdown{min-width:0}.date-row{flex-direction:column;align-items:stretch}.field input,.field select{width:100%}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- PERIOD HERO -->
+  <section class="period-hero" aria-label="集計期間">
+    <div class="period-label">集計期間 — Aggregation Period</div>
+    <div class="period-big" id="periodBig"><span id="startBig">2026年10月23日（金）</span> 〜 <span id="endBig">2026年10月29日（木）</span></div>
+    <div class="period-sub">
+      <span class="badge">● 取得済みデータ</span>
+      <span id="daysLabel">7日間</span>
+      <span>最終チェック：2026年10月30日</span>
+      <span>対象：Meta ×2 / Google ×2 ・ 計4アカウント</span>
+    </div>
+
+    <div class="controls">
+      <div class="presets" role="group" aria-label="期間プリセット">
+        <button class="preset active" data-preset="last7">直近7日間</button>
+        <button class="preset" data-preset="last30">直近30日間</button>
+        <button class="preset" data-preset="thisMonth">今月（10月）</button>
+        <button class="preset" data-preset="lastMonth">先月（9月）</button>
+        <button class="preset" data-preset="custom">自由に選ぶ</button>
+      </div>
+      <div class="date-row">
+        <div class="field"><label for="startDate">開始日</label><input type="date" id="startDate" value="2026-10-23" min="2025-01-01" max="2026-12-31"></div>
+        <div class="field"><label for="endDate">終了日</label><input type="date" id="endDate" value="2026-10-29" min="2025-01-01" max="2026-12-31"></div>
+        <button class="btn btn-primary" id="applyBtn">この期間で表示</button>
+        <div class="field"><label for="savedPeriod">取得済みの期間から選ぶ</label>
+          <select id="savedPeriod">
+            <option value="2026-10-23|2026-10-29" selected>2026/10/23 〜 2026/10/29（直近7日間）</option>
+            <option value="2026-10-21|2026-10-27">2026/10/21 〜 2026/10/27（前回チェック）</option>
+          </select>
+        </div>
+        <button class="btn btn-ghost" id="resetBtn">直近7日間に戻す</button>
+      </div>
+      <div class="notice" id="unfetchedNotice"><strong>この期間の内訳データは未取得です。</strong> 期間表示は切り替わりましたが、下の数値は直近取得期間（2026/10/23〜10/29）の実績です。次回チェック（毎月5・10・15・20・25・30日 08:00）または期間を指定した再取得で、この期間の実績に差し替わります。</div>
+    </div>
+  </section>
+
+  <!-- ALERTS -->
+  <section class="alerts">
+    <h2>⚠ 異常・要確認</h2>
+    <div class="alert"><span class="dot red"></span><div><strong>Meta monoralbikes：配信ゼロが継続</strong> — 期間内 費用 ¥0 / 表示 0 / クリック 0。実質停止状態です。</div></div>
+    <div class="alert"><span class="dot amber"></span><div><strong>Google MONORAL「[P-MAX] ワイヤフレーム主力」：診断「有効（不適切な設定）」</strong> — Googleタグ未設定、メインのコンバージョンアクション未指定、入札戦略は学習中。</div></div>
+    <div class="alert"><span class="dot amber"></span><div><strong>Google MONORALBIKES：不承認・警告あり</strong> — 配信ゼロのキャンペーンに不承認（［自転車］自転車系サイトへの場所指定表示／商品別リタゲ）。ヘルスケア認定の申請と拡張コンバージョン未記録の警告も継続。</div></div>
+    <div class="alert"><span class="dot blue"></span><div><strong>支払い関連は正常</strong> — 4アカウントとも支払い失敗・残高不足の警告なし。購入・コンバージョンは期間内 0件（前回も0件）。</div></div>
+  </section>
+
+  <!-- KPIs BuzzEC style -->
+  <section class="kpis" aria-label="合計指標">
+    <article class="kpi">
+      <div class="kpi-head"><span style="display:flex;gap:9px;align-items:center"><span class="icon" style="background:#E85A17">¥</span>予算（利用金額）</span></div>
+      <div class="kpi-num">¥18,688</div>
+      <div class="diff">前回期間比 <b>+¥2,490</b> 相当の動き（Google MONORAL +¥2,813 / MONORALBIKES −¥364 / Meta OUTDOOR +¥41）</div>
+      <div class="mini"><div class="mini-row"><span>Meta 合計</span><strong>¥7,120</strong></div><div class="mini-row"><span>Google 合計</span><strong>¥11,568</strong></div><div class="progress"><i style="width:62%"></i></div><div class="mini-row"><span style="color:var(--muted)">費用シェア Google 62% / Meta 38%</span><span></span></div></div>
+    </article>
+    <article class="kpi">
+      <div class="kpi-head"><span style="display:flex;gap:9px;align-items:center"><span class="icon" style="background:#2F7CF6">↗</span>クリック数</span><span title="全アカウント合計">ⓘ</span></div>
+      <div class="kpi-num">1,643</div>
+      <div class="diff">クリック単価（平均CPC） <b>¥11.4</b></div>
+      <div class="mini"><div class="mini-row"><span>Meta OUTDOOR</span><strong>775</strong></div><div class="mini-row"><span>Google MONORAL</span><strong>729</strong></div><div class="mini-row"><span>Google MONORALBIKES</span><strong>139</strong></div></div>
+    </article>
+    <article class="kpi accent-orange">
+      <div class="kpi-head"><span style="display:flex;gap:9px;align-items:center"><span class="icon" style="background:#C2410C">▥</span>売上（CV値）</span><span>ⓘ</span></div>
+      <div class="kpi-num">¥0</div>
+      <div class="diff"><b>¥0</b> 前期間比 — 購入計測は期間内 0件</div>
+      <div class="mini" style="background:rgba(255,255,255,.55)"><div class="mini-row"><span>購入（全アカウント）</span><strong>0件</strong></div><div class="mini-row"><span>補足</span><strong style="font-weight:500">計測設定の確認が課題</strong></div></div>
+    </article>
+    <article class="kpi">
+      <div class="kpi-head"><span style="display:flex;gap:9px;align-items:center"><span class="icon" style="background:#0E9B7A">↻</span>ROAS</span><span>ⓘ</span></div>
+      <div class="kpi-num">0<small>%</small></div>
+      <div class="diff"><b>0%</b> 前期間比 — 売上 ¥0 のため</div>
+    </article>
+    <article class="kpi">
+      <div class="kpi-head"><span style="display:flex;gap:9px;align-items:center"><span class="icon" style="background:#D99A00">◉</span>表示回数</span><span>ⓘ</span></div>
+      <div class="kpi-num">70,708</div>
+      <div class="diff">最多は Google MONORALBIKES <b>39,249</b>（ディスプレイ中心）</div>
+    </article>
+    <article class="kpi accent-lav">
+      <div class="kpi-head"><span style="display:flex;gap:9px;align-items:center"><span class="icon" style="background:#7C4DDB">🛒</span>獲得数</span><span>ⓘ</span></div>
+      <div class="kpi-num">0</div>
+      <div class="diff"><b>0</b> 前期間比</div>
+      <div class="mini" style="background:rgba(255,255,255,.55)"><div class="mini-row"><span>獲得単価</span><strong>—</strong></div><div class="mini-row"><span>獲得率（クリック→購入）</span><strong>0%</strong></div></div>
+    </article>
+  </section>
+
+  <!-- ACCOUNT TABLE WITH BREAKDOWN COLUMN -->
+  <section class="section">
+    <h2>アカウント別 — 広告種類の内訳つき</h2>
+    <p class="lead">各アカウントの行の中に、広告種類（Google）／目的（Meta）の内訳を費用シェアのバーと％で表示しています。</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>アカウント</th><th>状態</th><th class="num">費用</th><th class="num">表示</th><th class="num">クリック</th><th class="num">平均CPC</th><th class="num">購入</th><th style="min-width:260px">広告種類の内訳（費用 / シェア / 表示 / クリック / CPC）</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="plat meta">META</span><div class="acct">MONORAL OUTDOOR</div></td>
+            <td><span class="status on">● 配信中</span></td>
+            <td class="num"><strong>¥7,120</strong></td><td class="num">12,500</td><td class="num">775</td><td class="num">¥9</td><td class="num">—</td>
+            <td><div class="breakdown">
+              <div class="bd-row"><span class="bd-name">トラフィック</span><span class="bd-bar"><i style="width:76%"></i></span><span><strong>¥5,411</strong> 76%<br><span class="bd-meta">11,338表示 / 712 / ¥7.6</span></span></div>
+              <div class="bd-row"><span class="bd-name">売上</span><span class="bd-bar"><i class="b2" style="width:24%"></i></span><span><strong>¥1,709</strong> 24%<br><span class="bd-meta">1,162表示 / 63 / ¥27.1</span></span></div>
+            </div></td>
+          </tr>
+          <tr>
+            <td><span class="plat meta">META</span><div class="acct">monoralbikes</div></td>
+            <td><span class="status off">● 実質停止</span></td>
+            <td class="num"><strong>¥0</strong></td><td class="num">0</td><td class="num">0</td><td class="num">—</td><td class="num">—</td>
+            <td><span style="color:var(--muted);font-size:12.5px">配信実績なしのため内訳なし</span></td>
+          </tr>
+          <tr>
+            <td><span class="plat google">GOOGLE</span><div class="acct">MONORAL</div><div style="font-size:11px;color:var(--muted)">日予算 合計 ¥2,240（検索¥990＋ショッピング¥500＋P-MAX¥500＋P-MAX-2 ¥250）</div></td>
+            <td><span class="status on">● 配信中</span></td>
+            <td class="num"><strong>¥8,812</strong></td><td class="num">18,959</td><td class="num">729</td><td class="num">¥12</td><td class="num">0</td>
+            <td><div class="breakdown">
+              <div class="bd-row"><span class="bd-name">検索</span><span class="bd-bar"><i style="width:67%"></i></span><span><strong>¥5,882</strong> 67%<br><span class="bd-meta">6,454表示 / 262 / ¥22.4</span></span></div>
+              <div class="bd-row"><span class="bd-name">P-MAX</span><span class="bd-bar"><i class="b2" style="width:28%"></i></span><span><strong>¥2,483</strong> 28%<br><span class="bd-meta">11,359表示 / 456 / ¥5.4</span></span></div>
+              <div class="bd-row"><span class="bd-name">ショッピング</span><span class="bd-bar"><i class="b3" style="width:5%"></i></span><span><strong>¥447</strong> 5%<br><span class="bd-meta">1,146表示 / 11 / ¥40.6</span></span></div>
+            </div></td>
+          </tr>
+          <tr>
+            <td><span class="plat google">GOOGLE</span><div class="acct">MONORALBIKES</div></td>
+            <td><span class="status on">● 配信中</span></td>
+            <td class="num"><strong>¥2,756</strong></td><td class="num">39,249</td><td class="num">139</td><td class="num">¥20</td><td class="num">0</td>
+            <td><div class="breakdown">
+              <div class="bd-row"><span class="bd-name">P-MAX</span><span class="bd-bar"><i style="width:63%"></i></span><span><strong>¥1,727</strong> 63%<br><span class="bd-meta">6,704表示 / 110 / ¥15.7</span></span></div>
+              <div class="bd-row"><span class="bd-name">ディスプレイ</span><span class="bd-bar"><i class="b4" style="width:37%"></i></span><span><strong>¥1,029</strong> 37%<br><span class="bd-meta">32,545表示 / 29 / ¥35.5</span></span></div>
+            </div></td>
+          </tr>
+          <tr style="background:var(--card2);font-weight:800"><td colspan="2">合計（4アカウント）</td><td class="num">¥18,688</td><td class="num">70,708</td><td class="num">1,643</td><td class="num">¥11.4</td><td class="num">0</td><td style="font-weight:500;font-size:12.5px;color:var(--muted)">検索が費用の最大項目（¥5,882）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mobile cards -->
+    <div class="mobile-cards">
+      <div class="mcard"><span class="plat meta">META</span><div class="acct">MONORAL OUTDOOR — 配信中</div><div class="mgrid"><div><span>費用</span><strong>¥7,120</strong></div><div><span>表示 / クリック</span><strong>12,500 / 775</strong></div></div><div class="breakdown"><div class="bd-row"><span class="bd-name">トラフィック</span><span class="bd-bar"><i style="width:76%"></i></span><span>¥5,411 76%</span></div><div class="bd-row"><span class="bd-name">売上</span><span class="bd-bar"><i class="b2" style="width:24%"></i></span><span>¥1,709 24%</span></div></div></div>
+      <div class="mcard"><span class="plat meta">META</span><div class="acct">monoralbikes — 実質停止</div><div class="mgrid"><div><span>費用</span><strong>¥0</strong></div><div><span>表示 / クリック</span><strong>0 / 0</strong></div></div><p style="color:var(--muted);font-size:12px;margin:4px 0 0">内訳なし（配信実績なし）</p></div>
+      <div class="mcard"><span class="plat google">GOOGLE</span><div class="acct">MONORAL — 配信中</div><div class="mgrid"><div><span>費用</span><strong>¥8,812</strong></div><div><span>表示 / クリック</span><strong>18,959 / 729</strong></div></div><div class="breakdown"><div class="bd-row"><span class="bd-name">検索</span><span class="bd-bar"><i style="width:67%"></i></span><span>¥5,882 67%</span></div><div class="bd-row"><span class="bd-name">P-MAX</span><span class="bd-bar"><i class="b2" style="width:28%"></i></span><span>¥2,483 28%</span></div><div class="bd-row"><span class="bd-name">ショッピング</span><span class="bd-bar"><i class="b3" style="width:5%"></i></span><span>¥447 5%</span></div></div></div>
+      <div class="mcard"><span class="plat google">GOOGLE</span><div class="acct">MONORALBIKES — 配信中</div><div class="mgrid"><div><span>費用</span><strong>¥2,756</strong></div><div><span>表示 / クリック</span><strong>39,249 / 139</strong></div></div><div class="breakdown"><div class="bd-row"><span class="bd-name">P-MAX</span><span class="bd-bar"><i style="width:63%"></i></span><span>¥1,727 63%</span></div><div class="bd-row"><span class="bd-name">ディスプレイ</span><span class="bd-bar"><i class="b4" style="width:37%"></i></span><span>¥1,029 37%</span></div></div></div>
+    </div>
+  </section>
+
+  <!-- DETAIL BREAKDOWNS -->
+  <div class="grid2">
+    <section class="subcard">
+      <h3>Meta MONORAL OUTDOOR — 配置面別</h3><div class="cap">費用の約半分は「その他」に集計されています</div>
+      <table><thead><tr><th>配置面</th><th class="num">費用</th><th class="num">表示</th><th class="num">クリック</th><th class="num">CPC</th></tr></thead>
+      <tbody>
+        <tr><td>その他</td><td class="num">¥3,474</td><td class="num">5,996</td><td class="num">360</td><td class="num">¥9.7</td></tr>
+        <tr><td>フィード</td><td class="num">¥1,620</td><td class="num">3,088</td><td class="num">193</td><td class="num">¥8.4</td></tr>
+        <tr><td>リール</td><td class="num">¥1,076</td><td class="num">2,300</td><td class="num">134</td><td class="num">¥8.0</td></tr>
+        <tr><td>ストーリーズ</td><td class="num">¥876</td><td class="num">1,017</td><td class="num">83</td><td class="num">¥10.6</td></tr>
+        <tr><td>Audience Network</td><td class="num">¥74</td><td class="num">97</td><td class="num">5</td><td class="num">¥14.8</td></tr>
+        <tr><td>検索</td><td class="num">¥0</td><td class="num">2</td><td class="num">0</td><td class="num">—</td></tr>
+      </tbody></table>
+    </section>
+    <section class="subcard">
+      <h3>キャンペーン補足（Google MONORAL）</h3><div class="cap">主力は Wireframe ライン</div>
+      <table><thead><tr><th>キャンペーン</th><th class="num">表示</th><th class="num">クリック</th><th class="num">費用</th></tr></thead>
+      <tbody>
+        <tr><td>［P-MAX］ワイヤフレーム主力</td><td class="num">11,358</td><td class="num">456</td><td class="num">¥2,483</td></tr>
+        <tr><td>［ショッピング］ワイヤフレーム主力</td><td class="num">1,146</td><td class="num">11</td><td class="num">¥447</td></tr>
+        <tr><td>Performance Max-2（10/29作成・全商品対象）</td><td class="num">1</td><td class="num">0</td><td class="num">¥0</td></tr>
+      </tbody></table>
+      <p style="font-size:12.5px;color:var(--muted);line-height:1.7;margin:10px 0 0">Performance Max-2 は学習中のため、期間内はまだ本格配信に至っていません。P-MAX主力と違い、対象は主力3商品ではなく全商品、最終URL拡張はオンです。</p>
+    </section>
+  </div>
+
+  <section class="section">
+    <h2>読み取り</h2>
+    <div class="notes">
+      <div class="note"><b>費用の中心は Google 検索</b>Google MONORAL の検索が ¥5,882（全体の31%）。CPC ¥22.4 と高めですが、クリック 262件を確保しています。</div>
+      <div class="note"><b>Meta は低CPCで集客</b>トラフィック目的が CPC ¥7.6 で 712クリック。売上目的は CPC ¥27.1 と割高で、購入はまだ計測されていません。</div>
+      <div class="note"><b>表示は多いが購入 0件</b>表示 70,708回・クリック 1,643件に対して購入 0件。タグ／コンバージョン設定の確認が最優先です。</div>
+    </div>
+  </section>
+
+  <p class="footer">
+    データ出典：広告チェック（集計期間 2026年10月23日〜10月29日、2026年10月30日確認）／ 前回比較は 2026年10月21日〜27日チェックとの差分<br>
+    定時チェック：毎月5・10・15・20・25・30日 08:00（次回 11月5日） ・ GitHub Pages 用リポジトリ：<a href="https://github.com/tsdesignltd/ads" target="_blank" rel="noopener">github.com/tsdesignltd/ads</a><br>
+    このページは取得済み実績のスナップショットです。期間を変えると見出しは切り替わりますが、未取得期間の数値は差し替わりません。
+  </p>
+</div>
+
+<script>
+(function(){
+  var startInput=document.getElementById('startDate');
+  var endInput=document.getElementById('endDate');
+  var startBig=document.getElementById('startBig');
+  var endBig=document.getElementById('endBig');
+  var daysLabel=document.getElementById('daysLabel');
+  var notice=document.getElementById('unfetchedNotice');
+  var saved=document.getElementById('savedPeriod');
+  var KNOWN='2026-10-23|2026-10-29';
+  var weekdays=['日','月','火','水','木','金','土'];
+  function parse(v){var p=v.split('-');return new Date(+p[0],+p[1]-1,+p[2]);}
+  function fmt(v){if(!v)return '—';var d=parse(v);return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日（'+weekdays[d.getDay()]+'）';}
+  function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  function render(){
+    var s=startInput.value,e=endInput.value;
+    if(s&&e&&parse(e)<parse(s)){var t=s;s=e;e=t;startInput.value=s;endInput.value=e;}
+    startBig.textContent=fmt(s); endBig.textContent=fmt(e);
+    if(s&&e){var days=Math.round((parse(e)-parse(s))/86400000)+1; daysLabel.textContent=days+'日間'; if(days>366){daysLabel.textContent=days+'日間（最大366日まで）';}}
+    var key=s+'|'+e;
+    notice.classList.toggle('show', key!==KNOWN);
+    document.querySelectorAll('.preset').forEach(function(b){b.classList.remove('active');});
+  }
+  function setPreset(name){
+    var end=new Date(2026,9,29), start;
+    if(name==='last7'){start=new Date(2026,9,23);}
+    else if(name==='last30'){start=new Date(2026,8,30);}
+    else if(name==='thisMonth'){start=new Date(2026,9,1);}
+    else if(name==='lastMonth'){start=new Date(2026,8,1); end=new Date(2026,8,30);}
+    else {return;}
+    startInput.value=iso(start); endInput.value=iso(end); render();
+    document.querySelector('[data-preset="'+name+'"]').classList.add('active');
+  }
+  document.querySelectorAll('.preset').forEach(function(b){
+    b.addEventListener('click',function(){
+      if(b.dataset.preset==='custom'){startInput.focus(); document.querySelectorAll('.preset').forEach(function(x){x.classList.remove('active')}); b.classList.add('active'); return;}
+      setPreset(b.dataset.preset);
+    });
+  });
+  document.getElementById('applyBtn').addEventListener('click',render);
+  startInput.addEventListener('change',render); endInput.addEventListener('change',render);
+  saved.addEventListener('change',function(){var p=saved.value.split('|'); startInput.value=p[0]; endInput.value=p[1]; render();});
+  document.getElementById('resetBtn').addEventListener('click',function(){setPreset('last7'); saved.value=KNOWN;});
+  render();
+  document.querySelector('[data-preset="last7"]').classList.add('active');
+})();
+</script>
+</body>
+</html>
