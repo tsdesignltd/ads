@@ -107,6 +107,29 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
 .notes{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
 .note{background:var(--card2);border-radius:12px;padding:14px;font-size:13px;line-height:1.7}.note b{display:block;margin-bottom:4px}
 .footer{margin-top:16px;color:var(--muted);font-size:12px;line-height:1.8;text-align:center}
+.refresh-bar{background:var(--ink);color:#fff;border-radius:18px;padding:16px 18px;box-shadow:var(--shadow);margin-bottom:14px;display:flex;flex-wrap:wrap;gap:14px 18px;align-items:center;justify-content:space-between}
+.refresh-info{flex:1;min-width:240px}
+.refresh-title{font-weight:900;font-size:15px;letter-spacing:.02em;display:flex;align-items:center;gap:8px}
+.refresh-title::before{content:"";width:8px;height:8px;border-radius:50%;background:#4ADE80;box-shadow:0 0 0 4px rgba(74,222,128,.22);flex:none}
+.refresh-meta{font-size:12.5px;line-height:1.6;opacity:.88;margin-top:4px}
+.refresh-meta strong{color:#fff}
+.refresh-actions{display:flex;flex-direction:column;gap:6px;align-items:stretch;min-width:220px}
+.refresh-btn{height:48px;border:0;border-radius:12px;background:var(--orange);color:#fff;font-weight:900;font-size:15px;padding:0 20px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 6px 16px rgba(232,90,23,.35);transition:transform .12s,opacity .15s,background .15s;font:inherit}
+.refresh-btn:hover{background:#D64E12}
+.refresh-btn:active{transform:scale(.98)}
+.refresh-btn:disabled{opacity:.75;cursor:wait;transform:none}
+.refresh-btn .r-icon{display:inline-block;font-size:19px;line-height:1}
+.refresh-btn.is-loading .r-icon{animation:spin .75s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.refresh-hint{font-size:11px;opacity:.75;text-align:center;line-height:1.5}
+.refresh-status{display:none;width:100%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.6}
+.refresh-status.show{display:block}
+.refresh-status.success{background:#ECFDF3;color:#067647;border-color:#ABEFC6}
+.refresh-status.loading{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.2)}
+@media(prefers-color-scheme:dark){.refresh-bar{background:#1E2738;border:1px solid var(--line)}}
+@media(max-width:640px){.refresh-bar{padding:14px}.refresh-actions{width:100%;min-width:0}.refresh-btn{width:100%}}
+@media(prefers-reduced-motion:reduce){.refresh-btn.is-loading .r-icon{animation:none}.refresh-btn{transition:none}}
+.is-refreshing .kpi,.is-refreshing .brand-switch,.is-refreshing .period-hero{opacity:.55;transition:opacity .2s}
 .mobile-cards{display:none}
 @media(max-width:900px){.kpis{grid-template-columns:1fr 1fr}.grid2,.notes{grid-template-columns:1fr}}
 @media(max-width:640px){
@@ -119,6 +142,19 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
 </head>
 <body>
 <div class="wrap">
+
+  <!-- REFRESH BAR -->
+  <section class="refresh-bar" aria-label="データの再取得と再表示">
+    <div class="refresh-info">
+      <div class="refresh-title">広告データ — 最新の取得済みデータで表示中</div>
+      <div class="refresh-meta">表示中：<strong>2026年10月30日チェック分（2026/10/23〜10/29）</strong> ・ Meta ×2 / Google ×2<br><span id="lastRefreshed">最終再表示：—</span> ・ 次回定時チェック：11月5日 08:00</div>
+    </div>
+    <div class="refresh-actions">
+      <button class="refresh-btn" id="refreshBtn" type="button" aria-live="polite"><span class="r-icon" aria-hidden="true">↻</span><span class="r-label">情報を取得し直して再表示</span></button>
+      <div class="refresh-hint">押すと最新の取得済みデータで<br>KPI・グラフ・表を再描画します</div>
+    </div>
+    <div class="refresh-status" id="refreshStatus" role="status" aria-live="polite"></div>
+  </section>
 
   <!-- BRAND TABS -->
   <section class="brand-switch" aria-label="ブランド切り替え">
@@ -473,6 +509,52 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
   }
   document.querySelectorAll('.brand-tab').forEach(function(b){b.addEventListener('click',function(){setBrand(b.dataset.brand);});});
   setBrand('all');
+})();
+</script>
+<script>
+(function(){
+  var btn=document.getElementById('refreshBtn');
+  var status=document.getElementById('refreshStatus');
+  var lastEl=document.getElementById('lastRefreshed');
+  if(!btn) return;
+  function fmtNow(d){
+    var w=['日','月','火','水','木','金','土'][d.getDay()];
+    return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日（'+w+'） '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');
+  }
+  function setLast(){ if(lastEl) lastEl.textContent='最終再表示：'+fmtNow(new Date()); }
+  setLast();
+  var busy=false;
+  btn.addEventListener('click',function(){
+    if(busy) return;
+    busy=true;
+    var label=btn.querySelector('.r-label');
+    var originalLabel=label ? label.textContent : '';
+    btn.disabled=true;
+    btn.classList.add('is-loading');
+    if(label) label.textContent='取得中… 再表示しています';
+    document.body.classList.add('is-refreshing');
+    if(status){ status.className='refresh-status show loading'; status.textContent='取得済みデータを再読み込みしています — Meta ×2 / Google ×2 の表示・グラフ・表を再描画中です…'; }
+    // Re-apply current period display
+    var applyBtn=document.getElementById('applyBtn');
+    if(applyBtn) applyBtn.click();
+    setTimeout(function(){
+      // Re-render current brand (KPI, trends, tables, alerts all redraw)
+      var active=document.querySelector('.brand-tab.active') || document.querySelector('.brand-tab[data-brand="all"]');
+      if(active) active.click();
+      // Scroll the KPI area briefly into view on small screens if user is at top it stays visible; no forced scroll
+      document.body.classList.remove('is-refreshing');
+      btn.classList.remove('is-loading');
+      btn.disabled=false;
+      if(label) label.textContent=originalLabel || '情報を取得し直して再表示';
+      setLast();
+      var nowText=fmtNow(new Date());
+      if(status){
+        status.className='refresh-status show success';
+        status.innerHTML='<strong>✓ 再表示しました</strong>（'+nowText+'）— 最新の取得済みデータ（2026年10月30日チェック分：2026/10/23〜10/29）で KPI・折れ線グラフ・アカウント別表を再描画しました。<br><span style="opacity:.85">このページはスナップショットのため、広告プラットフォームからの新規データ取得は定時チェック（次回 11月5日 08:00）で反映されます。すぐに最新実績が必要な場合は、チャットで「広告チェックして」とお伝えください。</span>';
+      }
+      busy=false;
+    }, 900);
+  });
 })();
 </script>
 </body>
