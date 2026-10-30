@@ -21,6 +21,25 @@
 *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans JP",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
 a{color:var(--orange);text-decoration:none}
 .wrap{max-width:1240px;margin:0 auto;padding:18px 16px 40px}
+.brand-switch{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 18px 18px;box-shadow:var(--shadow);margin-bottom:14px}
+.brand-switch-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:6px 14px;margin-bottom:12px}
+.brand-switch-head h1{margin:0;font-size:16px;letter-spacing:.02em}
+.brand-switch-head p{margin:0;color:var(--muted);font-size:12.5px}
+.brand-tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.brand-tab{border:1.5px solid var(--line);background:var(--card2);color:var(--ink);border-radius:14px;padding:14px 12px 12px;cursor:pointer;text-align:left;font:inherit;transition:border-color .15s,background .15s}
+.brand-tab:hover{border-color:var(--muted)}
+.brand-tab.active{border-color:var(--orange);background:var(--orange-bg);box-shadow:0 0 0 1px var(--orange) inset}
+.brand-tab .bt-name{font-weight:900;font-size:17px;letter-spacing:.01em;display:flex;align-items:center;gap:8px}
+.brand-tab .bt-name::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--line);flex:none}
+.brand-tab.active .bt-name::before{background:var(--orange)}
+.brand-tab[data-brand="monoralbikes"].active{border-color:var(--blue);background:#EAF2FF;box-shadow:0 0 0 1px var(--blue) inset}
+.brand-tab[data-brand="monoralbikes"].active .bt-name::before{background:var(--blue)}
+@media(prefers-color-scheme:dark){.brand-tab[data-brand="monoralbikes"].active{background:#16233A}}
+.brand-tab .bt-meta{margin-top:5px;font-size:12px;color:var(--muted);line-height:1.5}
+.brand-tab .bt-meta strong{color:var(--ink);font-size:13px}
+.brand-current{margin-top:12px;font-size:13px;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.brand-current b{background:var(--ink);color:#fff;padding:3px 10px;border-radius:999px;font-size:12px;letter-spacing:.04em}
+@media(max-width:640px){.brand-tabs{grid-template-columns:1fr}.brand-tab{padding:12px}}
 .period-hero{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 22px 18px;box-shadow:var(--shadow)}
 .period-label{font-size:12px;letter-spacing:.14em;font-weight:800;color:var(--orange);text-transform:uppercase}
 .period-big{font-size:clamp(24px,5.2vw,38px);line-height:1.25;font-weight:900;letter-spacing:-.02em;margin:8px 0 6px}
@@ -91,6 +110,29 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
 <body>
 <div class="wrap">
 
+  <!-- BRAND TABS -->
+  <section class="brand-switch" aria-label="ブランド切り替え">
+    <div class="brand-switch-head">
+      <h1>ブランド別集計</h1>
+      <p>タブで表示するブランドを切り替えます（KPI・アカウント別表・内訳が連動）</p>
+    </div>
+    <div class="brand-tabs" role="tablist" aria-label="ブランド選択">
+      <button class="brand-tab active" role="tab" aria-selected="true" data-brand="all" id="tab-all">
+        <span class="bt-name">すべて</span>
+        <span class="bt-meta">MONORAL ＋ MONORALBIKES<br><strong>¥18,688</strong> ・ クリック 1,643 ・ 表示 70,708</span>
+      </button>
+      <button class="brand-tab" role="tab" aria-selected="false" data-brand="monoral" id="tab-monoral">
+        <span class="bt-name">MONORAL</span>
+        <span class="bt-meta">Meta OUTDOOR ＋ Google MONORAL<br><strong>¥15,932</strong> ・ クリック 1,504 ・ 表示 31,459</span>
+      </button>
+      <button class="brand-tab" role="tab" aria-selected="false" data-brand="monoralbikes" id="tab-monoralbikes">
+        <span class="bt-name">MONORALBIKES</span>
+        <span class="bt-meta">Meta monoralbikes ＋ Google MONORALBIKES<br><strong>¥2,756</strong> ・ クリック 139 ・ 表示 39,249</span>
+      </button>
+    </div>
+    <div class="brand-current" aria-live="polite"><span>現在表示中：</span><b id="currentBrandLabel">すべて（4アカウント）</b><span id="currentBrandNote" style="color:var(--muted)">全ブランドの合計を表示しています</span></div>
+  </section>
+
   <!-- PERIOD HERO -->
   <section class="period-hero" aria-label="集計期間">
     <div class="period-label">集計期間 — Aggregation Period</div>
@@ -99,7 +141,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
       <span class="badge">● 取得済みデータ</span>
       <span id="daysLabel">7日間</span>
       <span>最終チェック：2026年10月30日</span>
-      <span>対象：Meta ×2 / Google ×2 ・ 計4アカウント</span>
+      <span id="targetLabel">対象：Meta ×2 / Google ×2 ・ 計4アカウント</span>
     </div>
 
     <div class="controls">
@@ -127,33 +169,33 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
   </section>
 
   <!-- ALERTS -->
-  <section class="alerts">
-    <h2>⚠ 異常・要確認</h2>
-    <div class="alert"><span class="dot red"></span><div><strong>Meta monoralbikes：配信ゼロが継続</strong> — 期間内 費用 ¥0 / 表示 0 / クリック 0。実質停止状態です。</div></div>
-    <div class="alert"><span class="dot amber"></span><div><strong>Google MONORAL「[P-MAX] ワイヤフレーム主力」：診断「有効（不適切な設定）」</strong> — Googleタグ未設定、メインのコンバージョンアクション未指定、入札戦略は学習中。</div></div>
-    <div class="alert"><span class="dot amber"></span><div><strong>Google MONORALBIKES：不承認・警告あり</strong> — 配信ゼロのキャンペーンに不承認（［自転車］自転車系サイトへの場所指定表示／商品別リタゲ）。ヘルスケア認定の申請と拡張コンバージョン未記録の警告も継続。</div></div>
-    <div class="alert"><span class="dot blue"></span><div><strong>支払い関連は正常</strong> — 4アカウントとも支払い失敗・残高不足の警告なし。購入・コンバージョンは期間内 0件（前回も0件）。</div></div>
+  <section class="alerts" id="alertsSection">
+    <h2>⚠ 異常・要確認 <span id="alertBrandSuffix" style="font-size:12px;color:var(--muted);font-weight:500">— すべて表示中</span></h2>
+    <div class="alert" data-brand="monoralbikes"><span class="dot red"></span><div><strong>Meta monoralbikes：配信ゼロが継続</strong> — 期間内 費用 ¥0 / 表示 0 / クリック 0。実質停止状態です。</div></div>
+    <div class="alert" data-brand="monoral"><span class="dot amber"></span><div><strong>Google MONORAL「[P-MAX] ワイヤフレーム主力」：診断「有効（不適切な設定）」</strong> — Googleタグ未設定、メインのコンバージョンアクション未指定、入札戦略は学習中。</div></div>
+    <div class="alert" data-brand="monoralbikes"><span class="dot amber"></span><div><strong>Google MONORALBIKES：不承認・警告あり</strong> — 配信ゼロのキャンペーンに不承認（［自転車］自転車系サイトへの場所指定表示／商品別リタゲ）。ヘルスケア認定の申請と拡張コンバージョン未記録の警告も継続。</div></div>
+    <div class="alert" data-brand="all"><span class="dot blue"></span><div><strong>支払い関連は正常</strong> — <span id="alertPayText">4アカウントとも支払い失敗・残高不足の警告なし。購入・コンバージョンは期間内 0件（前回も0件）。</span></div></div>
   </section>
 
   <!-- KPIs BuzzEC style -->
   <section class="kpis" aria-label="合計指標">
     <article class="kpi">
       <div class="kpi-head"><span style="display:flex;gap:9px;align-items:center"><span class="icon" style="background:#E85A17">¥</span>予算（利用金額）</span></div>
-      <div class="kpi-num">¥18,688</div>
-      <div class="diff">前回期間比 <b>+¥2,490</b> 相当の動き（Google MONORAL +¥2,813 / MONORALBIKES −¥364 / Meta OUTDOOR +¥41）</div>
-      <div class="mini"><div class="mini-row"><span>Meta 合計</span><strong>¥7,120</strong></div><div class="mini-row"><span>Google 合計</span><strong>¥11,568</strong></div><div class="progress"><i style="width:62%"></i></div><div class="mini-row"><span style="color:var(--muted)">費用シェア Google 62% / Meta 38%</span><span></span></div></div>
+      <div class="kpi-num" id="kpiCost">¥18,688</div>
+      <div class="diff" id="kpiCostDiff">前回期間比 <b>+¥2,490</b> 相当の動き（Google MONORAL +¥2,813 / MONORALBIKES −¥364 / Meta OUTDOOR +¥41）</div>
+      <div class="mini"><div class="mini-row"><span>Meta 合計</span><strong id="kpiMetaCost">¥7,120</strong></div><div class="mini-row"><span>Google 合計</span><strong id="kpiGoogleCost">¥11,568</strong></div><div class="progress"><i id="kpiShareBar" style="width:62%"></i></div><div class="mini-row"><span style="color:var(--muted)" id="kpiShareText">費用シェア Google 62% / Meta 38%</span><span></span></div></div>
     </article>
     <article class="kpi">
       <div class="kpi-head"><span style="display:flex;gap:9px;align-items:center"><span class="icon" style="background:#2F7CF6">↗</span>クリック数</span><span title="全アカウント合計">ⓘ</span></div>
-      <div class="kpi-num">1,643</div>
-      <div class="diff">クリック単価（平均CPC） <b>¥11.4</b></div>
-      <div class="mini"><div class="mini-row"><span>Meta OUTDOOR</span><strong>775</strong></div><div class="mini-row"><span>Google MONORAL</span><strong>729</strong></div><div class="mini-row"><span>Google MONORALBIKES</span><strong>139</strong></div></div>
+      <div class="kpi-num" id="kpiClicks">1,643</div>
+      <div class="diff">クリック単価（平均CPC） <b id="kpiCpc">¥11.4</b></div>
+      <div class="mini" id="kpiClickMini"><div class="mini-row"><span>Meta OUTDOOR</span><strong>775</strong></div><div class="mini-row"><span>Google MONORAL</span><strong>729</strong></div><div class="mini-row"><span>Google MONORALBIKES</span><strong>139</strong></div></div>
     </article>
     <article class="kpi accent-orange">
       <div class="kpi-head"><span style="display:flex;gap:9px;align-items:center"><span class="icon" style="background:#C2410C">▥</span>売上（CV値）</span><span>ⓘ</span></div>
       <div class="kpi-num">¥0</div>
       <div class="diff"><b>¥0</b> 前期間比 — 購入計測は期間内 0件</div>
-      <div class="mini" style="background:rgba(255,255,255,.55)"><div class="mini-row"><span>購入（全アカウント）</span><strong>0件</strong></div><div class="mini-row"><span>補足</span><strong style="font-weight:500">計測設定の確認が課題</strong></div></div>
+      <div class="mini" style="background:rgba(255,255,255,.55)"><div class="mini-row"><span id="purchaseLabel">購入（全アカウント）</span><strong>0件</strong></div><div class="mini-row"><span>補足</span><strong style="font-weight:500">計測設定の確認が課題</strong></div></div>
     </article>
     <article class="kpi">
       <div class="kpi-head"><span style="display:flex;gap:9px;align-items:center"><span class="icon" style="background:#0E9B7A">↻</span>ROAS</span><span>ⓘ</span></div>
@@ -162,8 +204,8 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
     </article>
     <article class="kpi">
       <div class="kpi-head"><span style="display:flex;gap:9px;align-items:center"><span class="icon" style="background:#D99A00">◉</span>表示回数</span><span>ⓘ</span></div>
-      <div class="kpi-num">70,708</div>
-      <div class="diff">最多は Google MONORALBIKES <b>39,249</b>（ディスプレイ中心）</div>
+      <div class="kpi-num" id="kpiImp">70,708</div>
+      <div class="diff" id="kpiImpNote">最多は Google MONORALBIKES <b>39,249</b>（ディスプレイ中心）</div>
     </article>
     <article class="kpi accent-lav">
       <div class="kpi-head"><span style="display:flex;gap:9px;align-items:center"><span class="icon" style="background:#7C4DDB">🛒</span>獲得数</span><span>ⓘ</span></div>
@@ -174,15 +216,15 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
   </section>
 
   <!-- ACCOUNT TABLE WITH BREAKDOWN COLUMN -->
-  <section class="section">
-    <h2>アカウント別 — 広告種類の内訳つき</h2>
-    <p class="lead">各アカウントの行の中に、広告種類（Google）／目的（Meta）の内訳を費用シェアのバーと％で表示しています。</p>
+  <section class="section" id="accountSection">
+    <h2 id="accountHeading">アカウント別 — 広告種類の内訳つき</h2>
+    <p class="lead" id="accountLead">各アカウントの行の中に、広告種類（Google）／目的（Meta）の内訳を費用シェアのバーと％で表示しています。</p>
 
     <div class="table-wrap">
       <table>
         <thead><tr><th>アカウント</th><th>状態</th><th class="num">費用</th><th class="num">表示</th><th class="num">クリック</th><th class="num">平均CPC</th><th class="num">購入</th><th style="min-width:260px">広告種類の内訳（費用 / シェア / 表示 / クリック / CPC）</th></tr></thead>
         <tbody>
-          <tr>
+          <tr data-brand="monoral">
             <td><span class="plat meta">META</span><div class="acct">MONORAL OUTDOOR</div></td>
             <td><span class="status on">● 配信中</span></td>
             <td class="num"><strong>¥7,120</strong></td><td class="num">12,500</td><td class="num">775</td><td class="num">¥9</td><td class="num">—</td>
@@ -191,13 +233,13 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
               <div class="bd-row"><span class="bd-name">売上</span><span class="bd-bar"><i class="b2" style="width:24%"></i></span><span><strong>¥1,709</strong> 24%<br><span class="bd-meta">1,162表示 / 63 / ¥27.1</span></span></div>
             </div></td>
           </tr>
-          <tr>
+          <tr data-brand="monoralbikes">
             <td><span class="plat meta">META</span><div class="acct">monoralbikes</div></td>
             <td><span class="status off">● 実質停止</span></td>
             <td class="num"><strong>¥0</strong></td><td class="num">0</td><td class="num">0</td><td class="num">—</td><td class="num">—</td>
             <td><span style="color:var(--muted);font-size:12.5px">配信実績なしのため内訳なし</span></td>
           </tr>
-          <tr>
+          <tr data-brand="monoral">
             <td><span class="plat google">GOOGLE</span><div class="acct">MONORAL</div><div style="font-size:11px;color:var(--muted)">日予算 合計 ¥2,240（検索¥990＋ショッピング¥500＋P-MAX¥500＋P-MAX-2 ¥250）</div></td>
             <td><span class="status on">● 配信中</span></td>
             <td class="num"><strong>¥8,812</strong></td><td class="num">18,959</td><td class="num">729</td><td class="num">¥12</td><td class="num">0</td>
@@ -207,7 +249,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
               <div class="bd-row"><span class="bd-name">ショッピング</span><span class="bd-bar"><i class="b3" style="width:5%"></i></span><span><strong>¥447</strong> 5%<br><span class="bd-meta">1,146表示 / 11 / ¥40.6</span></span></div>
             </div></td>
           </tr>
-          <tr>
+          <tr data-brand="monoralbikes">
             <td><span class="plat google">GOOGLE</span><div class="acct">MONORALBIKES</div></td>
             <td><span class="status on">● 配信中</span></td>
             <td class="num"><strong>¥2,756</strong></td><td class="num">39,249</td><td class="num">139</td><td class="num">¥20</td><td class="num">0</td>
@@ -216,22 +258,22 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
               <div class="bd-row"><span class="bd-name">ディスプレイ</span><span class="bd-bar"><i class="b4" style="width:37%"></i></span><span><strong>¥1,029</strong> 37%<br><span class="bd-meta">32,545表示 / 29 / ¥35.5</span></span></div>
             </div></td>
           </tr>
-          <tr style="background:var(--card2);font-weight:800"><td colspan="2">合計（4アカウント）</td><td class="num">¥18,688</td><td class="num">70,708</td><td class="num">1,643</td><td class="num">¥11.4</td><td class="num">0</td><td style="font-weight:500;font-size:12.5px;color:var(--muted)">検索が費用の最大項目（¥5,882）</td></tr>
+          <tr style="background:var(--card2);font-weight:800"><td colspan="2" id="totalLabel">合計（4アカウント）</td><td class="num" id="totalCost">¥18,688</td><td class="num" id="totalImp">70,708</td><td class="num" id="totalClicks">1,643</td><td class="num" id="totalCpc">¥11.4</td><td class="num">0</td><td style="font-weight:500;font-size:12.5px;color:var(--muted)" id="totalNote">検索が費用の最大項目（¥5,882）</td></tr>
         </tbody>
       </table>
     </div>
 
     <!-- Mobile cards -->
     <div class="mobile-cards">
-      <div class="mcard"><span class="plat meta">META</span><div class="acct">MONORAL OUTDOOR — 配信中</div><div class="mgrid"><div><span>費用</span><strong>¥7,120</strong></div><div><span>表示 / クリック</span><strong>12,500 / 775</strong></div></div><div class="breakdown"><div class="bd-row"><span class="bd-name">トラフィック</span><span class="bd-bar"><i style="width:76%"></i></span><span>¥5,411 76%</span></div><div class="bd-row"><span class="bd-name">売上</span><span class="bd-bar"><i class="b2" style="width:24%"></i></span><span>¥1,709 24%</span></div></div></div>
-      <div class="mcard"><span class="plat meta">META</span><div class="acct">monoralbikes — 実質停止</div><div class="mgrid"><div><span>費用</span><strong>¥0</strong></div><div><span>表示 / クリック</span><strong>0 / 0</strong></div></div><p style="color:var(--muted);font-size:12px;margin:4px 0 0">内訳なし（配信実績なし）</p></div>
-      <div class="mcard"><span class="plat google">GOOGLE</span><div class="acct">MONORAL — 配信中</div><div class="mgrid"><div><span>費用</span><strong>¥8,812</strong></div><div><span>表示 / クリック</span><strong>18,959 / 729</strong></div></div><div class="breakdown"><div class="bd-row"><span class="bd-name">検索</span><span class="bd-bar"><i style="width:67%"></i></span><span>¥5,882 67%</span></div><div class="bd-row"><span class="bd-name">P-MAX</span><span class="bd-bar"><i class="b2" style="width:28%"></i></span><span>¥2,483 28%</span></div><div class="bd-row"><span class="bd-name">ショッピング</span><span class="bd-bar"><i class="b3" style="width:5%"></i></span><span>¥447 5%</span></div></div></div>
-      <div class="mcard"><span class="plat google">GOOGLE</span><div class="acct">MONORALBIKES — 配信中</div><div class="mgrid"><div><span>費用</span><strong>¥2,756</strong></div><div><span>表示 / クリック</span><strong>39,249 / 139</strong></div></div><div class="breakdown"><div class="bd-row"><span class="bd-name">P-MAX</span><span class="bd-bar"><i style="width:63%"></i></span><span>¥1,727 63%</span></div><div class="bd-row"><span class="bd-name">ディスプレイ</span><span class="bd-bar"><i class="b4" style="width:37%"></i></span><span>¥1,029 37%</span></div></div></div>
+      <div class="mcard" data-brand="monoral"><span class="plat meta">META</span><div class="acct">MONORAL OUTDOOR — 配信中</div><div class="mgrid"><div><span>費用</span><strong>¥7,120</strong></div><div><span>表示 / クリック</span><strong>12,500 / 775</strong></div></div><div class="breakdown"><div class="bd-row"><span class="bd-name">トラフィック</span><span class="bd-bar"><i style="width:76%"></i></span><span>¥5,411 76%</span></div><div class="bd-row"><span class="bd-name">売上</span><span class="bd-bar"><i class="b2" style="width:24%"></i></span><span>¥1,709 24%</span></div></div></div>
+      <div class="mcard" data-brand="monoralbikes"><span class="plat meta">META</span><div class="acct">monoralbikes — 実質停止</div><div class="mgrid"><div><span>費用</span><strong>¥0</strong></div><div><span>表示 / クリック</span><strong>0 / 0</strong></div></div><p style="color:var(--muted);font-size:12px;margin:4px 0 0">内訳なし（配信実績なし）</p></div>
+      <div class="mcard" data-brand="monoral"><span class="plat google">GOOGLE</span><div class="acct">MONORAL — 配信中</div><div class="mgrid"><div><span>費用</span><strong>¥8,812</strong></div><div><span>表示 / クリック</span><strong>18,959 / 729</strong></div></div><div class="breakdown"><div class="bd-row"><span class="bd-name">検索</span><span class="bd-bar"><i style="width:67%"></i></span><span>¥5,882 67%</span></div><div class="bd-row"><span class="bd-name">P-MAX</span><span class="bd-bar"><i class="b2" style="width:28%"></i></span><span>¥2,483 28%</span></div><div class="bd-row"><span class="bd-name">ショッピング</span><span class="bd-bar"><i class="b3" style="width:5%"></i></span><span>¥447 5%</span></div></div></div>
+      <div class="mcard" data-brand="monoralbikes"><span class="plat google">GOOGLE</span><div class="acct">MONORALBIKES — 配信中</div><div class="mgrid"><div><span>費用</span><strong>¥2,756</strong></div><div><span>表示 / クリック</span><strong>39,249 / 139</strong></div></div><div class="breakdown"><div class="bd-row"><span class="bd-name">P-MAX</span><span class="bd-bar"><i style="width:63%"></i></span><span>¥1,727 63%</span></div><div class="bd-row"><span class="bd-name">ディスプレイ</span><span class="bd-bar"><i class="b4" style="width:37%"></i></span><span>¥1,029 37%</span></div></div></div>
     </div>
   </section>
 
   <!-- DETAIL BREAKDOWNS -->
-  <div class="grid2">
+  <div class="grid2" id="detailGrid">
     <section class="subcard">
       <h3>Meta MONORAL OUTDOOR — 配置面別</h3><div class="cap">費用の約半分は「その他」に集計されています</div>
       <table><thead><tr><th>配置面</th><th class="num">費用</th><th class="num">表示</th><th class="num">クリック</th><th class="num">CPC</th></tr></thead>
@@ -256,9 +298,11 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
     </section>
   </div>
 
-  <section class="section">
+  <section class="section" id="bikesDetailNote" style="display:none"><h2>MONORALBIKES の内訳について</h2><p class="lead" style="margin-top:8px">MONORALBIKESは Google の P-MAX（¥1,727 / 63%）とディスプレイ（¥1,029 / 37%）が中心です。Meta monoralbikes は期間内 配信ゼロのため、配置面別の詳細はありません。表示 39,249回の大半（32,545回）はディスプレイです。</p></section>
+
+  <section class="section" id="notesSection">
     <h2>読み取り</h2>
-    <div class="notes">
+    <div class="notes" id="notesGrid">
       <div class="note"><b>費用の中心は Google 検索</b>Google MONORAL の検索が ¥5,882（全体の31%）。CPC ¥22.4 と高めですが、クリック 262件を確保しています。</div>
       <div class="note"><b>Meta は低CPCで集客</b>トラフィック目的が CPC ¥7.6 で 712クリック。売上目的は CPC ¥27.1 と割高で、購入はまだ計測されていません。</div>
       <div class="note"><b>表示は多いが購入 0件</b>表示 70,708回・クリック 1,643件に対して購入 0件。タグ／コンバージョン設定の確認が最優先です。</div>
@@ -317,6 +361,52 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
   document.getElementById('resetBtn').addEventListener('click',function(){setPreset('last7'); saved.value=KNOWN;});
   render();
   document.querySelector('[data-preset="last7"]').classList.add('active');
+})();
+</script>
+<script>
+(function(){
+  var DATA={
+    all:{label:'すべて（4アカウント）',note:'全ブランドの合計を表示しています',target:'対象：Meta ×2 / Google ×2 ・ 計4アカウント',cost:'¥18,688',costDiff:'前回期間比 <b>+¥2,490</b> 相当の動き（Google MONORAL +¥2,813 / MONORALBIKES −¥364 / Meta OUTDOOR +¥41）',meta:'¥7,120',google:'¥11,568',share:62,shareText:'費用シェア Google 62% / Meta 38%',clicks:'1,643',cpc:'¥11.4',mini:'<div class="mini-row"><span>Meta OUTDOOR</span><strong>775</strong></div><div class="mini-row"><span>Google MONORAL</span><strong>729</strong></div><div class="mini-row"><span>Google MONORALBIKES</span><strong>139</strong></div>',imp:'70,708',impNote:'最多は Google MONORALBIKES <b>39,249</b>（ディスプレイ中心）',totalLabel:'合計（4アカウント）',totalCost:'¥18,688',totalImp:'70,708',totalClicks:'1,643',totalCpc:'¥11.4',totalNote:'検索が費用の最大項目（¥5,882）',heading:'アカウント別 — 広告種類の内訳つき',suffix:'— すべて表示中',pay:'4アカウントとも支払い失敗・残高不足の警告なし。購入・コンバージョンは期間内 0件（前回も0件）。',purchase:'購入（全アカウント）'},
+    monoral:{label:'MONORAL（2アカウント）',note:'MONORALのみの合計です — Meta OUTDOOR ＋ Google MONORAL',target:'対象：MONORAL — Meta OUTDOOR / Google MONORAL ・ 計2アカウント',cost:'¥15,932',costDiff:'MONORAL分のみ — Google MONORAL +¥2,813 / Meta OUTDOOR +¥41 が前回からの主な動き',meta:'¥7,120',google:'¥8,812',share:55,shareText:'費用シェア Google 55% / Meta 45%',clicks:'1,504',cpc:'¥10.6',mini:'<div class="mini-row"><span>Meta OUTDOOR</span><strong>775</strong></div><div class="mini-row"><span>Google MONORAL</span><strong>729</strong></div>',imp:'31,459',impNote:'Google MONORAL <b>18,959</b> / Meta OUTDOOR 12,500',totalLabel:'MONORAL 合計（2アカウント）',totalCost:'¥15,932',totalImp:'31,459',totalClicks:'1,504',totalCpc:'¥10.6',totalNote:'検索が費用の最大項目（¥5,882 / MONORAL費用の37%）',heading:'MONORAL — アカウント別・種類内訳',suffix:'— MONORAL のみ表示中',pay:'MONORALの2アカウントとも支払い失敗・残高不足の警告なし。購入は期間内 0件。',purchase:'購入（MONORAL）'},
+    monoralbikes:{label:'MONORALBIKES（2アカウント）',note:'MONORALBIKESのみの合計です — Meta monoralbikes ＋ Google MONORALBIKES',target:'対象：MONORALBIKES — Meta monoralbikes / Google MONORALBIKES ・ 計2アカウント',cost:'¥2,756',costDiff:'MONORALBIKES分のみ — 費用はすべて Google MONORALBIKES。Meta monoralbikes は ¥0',meta:'¥0',google:'¥2,756',share:100,shareText:'費用シェア Google 100% / Meta 0%',clicks:'139',cpc:'¥19.8',mini:'<div class="mini-row"><span>Google MONORALBIKES</span><strong>139</strong></div><div class="mini-row"><span>Meta monoralbikes</span><strong>0</strong></div>',imp:'39,249',impNote:'すべて Google MONORALBIKES <b>39,249</b>（ディスプレイ中心） / Meta は 0',totalLabel:'MONORALBIKES 合計（2アカウント）',totalCost:'¥2,756',totalImp:'39,249',totalClicks:'139',totalCpc:'¥19.8',totalNote:'P-MAXが最大項目（¥1,727 / 63%）、次いでディスプレイ ¥1,029',heading:'MONORALBIKES — アカウント別・種類内訳',suffix:'— MONORALBIKES のみ表示中',pay:'MONORALBIKESの2アカウントとも支払い失敗・残高不足の警告なし。購入は期間内 0件。',purchase:'購入（MONORALBIKES）'}
+  };
+  function $(id){return document.getElementById(id);}
+  function setBrand(brand){
+    var d=DATA[brand]; if(!d) return;
+    document.querySelectorAll('.brand-tab').forEach(function(b){var on=b.dataset.brand===brand; b.classList.toggle('active',on); b.setAttribute('aria-selected', on?'true':'false');});
+    $('currentBrandLabel').textContent=d.label;
+    $('currentBrandNote').textContent=d.note;
+    var tl=$('targetLabel'); if(tl) tl.textContent=d.target;
+    $('kpiCost').textContent=d.cost;
+    $('kpiCostDiff').innerHTML=d.costDiff;
+    $('kpiMetaCost').textContent=d.meta;
+    $('kpiGoogleCost').textContent=d.google;
+    $('kpiShareBar').style.width=d.share+'%';
+    $('kpiShareText').textContent=d.shareText;
+    $('kpiClicks').textContent=d.clicks;
+    $('kpiCpc').textContent=d.cpc;
+    $('kpiClickMini').innerHTML=d.mini;
+    $('kpiImp').textContent=d.imp;
+    $('kpiImpNote').innerHTML=d.impNote;
+    $('totalLabel').textContent=d.totalLabel;
+    $('totalCost').textContent=d.totalCost;
+    $('totalImp').textContent=d.totalImp;
+    $('totalClicks').textContent=d.totalClicks;
+    $('totalCpc').textContent=d.totalCpc;
+    $('totalNote').textContent=d.totalNote;
+    $('accountHeading').textContent=d.heading;
+    $('alertBrandSuffix').textContent=d.suffix;
+    $('alertPayText').textContent=d.pay;
+    var pl=$('purchaseLabel'); if(pl) pl.textContent=d.purchase;
+    var ng=$('notesGrid'); if(ng){ if(brand==='monoral'){ ng.innerHTML='<div class="note"><b>費用の中心は Google 検索</b>Google MONORAL の検索が ¥5,882（MONORAL費用の37%）。CPC ¥22.4 と高めですが、クリック 262件を確保しています。</div><div class="note"><b>Meta は低CPCで集客</b>トラフィック目的が CPC ¥7.6 で 712クリック。売上目的は CPC ¥27.1 と割高で、購入はまだ計測されていません。</div><div class="note"><b>表示 31,459回・購入 0件</b>表示 31,459回・クリック 1,504件に対して購入 0件。タグ／コンバージョン設定の確認が最優先です。</div>'; } else if(brand==='monoralbikes'){ ng.innerHTML='<div class="note"><b>費用の中心は Google P-MAX</b>Google MONORALBIKES の P-MAX が ¥1,727（費用の63%）。クリック 110件、CPC ¥15.7 です。</div><div class="note"><b>表示はディスプレイ中心</b>表示 39,249回のうちディスプレイが 32,545回。クリックは 29件と少なく、CPC ¥35.5 と高めです。</div><div class="note"><b>Meta は配信ゼロ・購入 0件</b>Meta monoralbikes は費用 ¥0／表示 0。全体では表示 39,249回・クリック 139件に対して購入 0件です。</div>'; } else { ng.innerHTML='<div class="note"><b>費用の中心は Google 検索</b>Google MONORAL の検索が ¥5,882（全体の31%）。CPC ¥22.4 と高めですが、クリック 262件を確保しています。</div><div class="note"><b>Meta は低CPCで集客</b>トラフィック目的が CPC ¥7.6 で 712クリック。売上目的は CPC ¥27.1 と割高で、購入はまだ計測されていません。</div><div class="note"><b>表示は多いが購入 0件</b>表示 70,708回・クリック 1,643件に対して購入 0件。タグ／コンバージョン設定の確認が最優先です。</div>'; } }
+    document.querySelectorAll('#accountSection tbody tr[data-brand]').forEach(function(r){r.style.display=(brand==='all'||r.dataset.brand===brand)?'':'none';});
+    document.querySelectorAll('.mobile-cards .mcard[data-brand]').forEach(function(c){c.style.display=(brand==='all'||c.dataset.brand===brand)?'':'none';});
+    document.querySelectorAll('#alertsSection .alert[data-brand]').forEach(function(a){a.style.display=(brand==='all'||a.dataset.brand===brand||a.dataset.brand==='all')?'':'none';});
+    var dg=$('detailGrid'); if(dg) dg.style.display=(brand==='monoralbikes')?'none':'';
+    var bn=$('bikesDetailNote'); if(bn) bn.style.display=(brand==='monoralbikes')?'':'none';
+  }
+  document.querySelectorAll('.brand-tab').forEach(function(b){b.addEventListener('click',function(){setBrand(b.dataset.brand);});});
+  setBrand('all');
 })();
 </script>
 </body>
