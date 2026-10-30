@@ -71,6 +71,16 @@ a{color:var(--orange);text-decoration:none}
 .kpi-num{font-size:32px;font-weight:900;letter-spacing:-.03em;margin:12px 0 4px;font-family:Inter,"Noto Sans JP",sans-serif}
 .kpi-num small{font-size:16px}
 .diff{font-size:12px;color:var(--muted)} .diff b{background:var(--card2);border:1px solid var(--line);padding:2px 7px;border-radius:999px;color:var(--ink)}
+.trend{margin-top:14px;padding:12px 12px 10px;background:var(--card2);border-radius:12px}
+.kpi.accent-orange .trend,.kpi.accent-lav .trend{background:rgba(255,255,255,.55)}
+@media(prefers-color-scheme:dark){.kpi.accent-orange .trend,.kpi.accent-lav .trend{background:var(--card2)}}
+.trend-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.trend-title{font-size:11px;font-weight:800;letter-spacing:.07em;color:var(--muted)}
+.trend-range{font-size:11px;color:var(--muted);white-space:nowrap}
+.trend-svg{width:100%;height:68px;display:block;margin-top:6px}
+.trend-axis{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:1px;padding:0 2px}
+.trend-foot{font-size:11.5px;color:var(--muted);margin-top:7px;line-height:1.5;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.trend-foot strong{color:var(--ink)}
 .mini{margin-top:12px;background:var(--card2);border-radius:10px;padding:10px 12px;font-size:13px}
 .mini-row{display:flex;justify-content:space-between;padding:3px 0}
 .progress{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:8px}.progress i{display:block;height:100%;background:var(--orange);width:62%}
@@ -183,34 +193,40 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
       <div class="kpi-head"><span style="display:flex;gap:9px;align-items:center"><span class="icon" style="background:#E85A17">¥</span>予算（利用金額）</span></div>
       <div class="kpi-num" id="kpiCost">¥18,688</div>
       <div class="diff" id="kpiCostDiff">前回期間比 <b>+¥2,490</b> 相当の動き（Google MONORAL +¥2,813 / MONORALBIKES −¥364 / Meta OUTDOOR +¥41）</div>
+      <div class="trend" aria-label="予算の経緯グラフ"><div class="trend-head"><span class="trend-title">経緯 — 日別推移（按分・目安）</span><span class="trend-range">10/23 〜 10/29</span></div><div id="trend-cost"></div><div class="trend-axis"><span>10/23</span><span>10/25</span><span>10/27</span><span>10/29</span></div><div class="trend-foot" id="trend-cost-foot"></div></div>
       <div class="mini"><div class="mini-row"><span>Meta 合計</span><strong id="kpiMetaCost">¥7,120</strong></div><div class="mini-row"><span>Google 合計</span><strong id="kpiGoogleCost">¥11,568</strong></div><div class="progress"><i id="kpiShareBar" style="width:62%"></i></div><div class="mini-row"><span style="color:var(--muted)" id="kpiShareText">費用シェア Google 62% / Meta 38%</span><span></span></div></div>
     </article>
     <article class="kpi">
       <div class="kpi-head"><span style="display:flex;gap:9px;align-items:center"><span class="icon" style="background:#2F7CF6">↗</span>クリック数</span><span title="全アカウント合計">ⓘ</span></div>
       <div class="kpi-num" id="kpiClicks">1,643</div>
       <div class="diff">クリック単価（平均CPC） <b id="kpiCpc">¥11.4</b></div>
+      <div class="trend" aria-label="クリック数の経緯グラフ"><div class="trend-head"><span class="trend-title">経緯 — 日別推移（按分・目安）</span><span class="trend-range">10/23 〜 10/29</span></div><div id="trend-clicks"></div><div class="trend-axis"><span>10/23</span><span>10/25</span><span>10/27</span><span>10/29</span></div><div class="trend-foot" id="trend-clicks-foot"></div></div>
       <div class="mini" id="kpiClickMini"><div class="mini-row"><span>Meta OUTDOOR</span><strong>775</strong></div><div class="mini-row"><span>Google MONORAL</span><strong>729</strong></div><div class="mini-row"><span>Google MONORALBIKES</span><strong>139</strong></div></div>
     </article>
     <article class="kpi accent-orange">
       <div class="kpi-head"><span style="display:flex;gap:9px;align-items:center"><span class="icon" style="background:#C2410C">▥</span>売上（CV値）</span><span>ⓘ</span></div>
       <div class="kpi-num">¥0</div>
       <div class="diff"><b>¥0</b> 前期間比 — 購入計測は期間内 0件</div>
+      <div class="trend" aria-label="売上の経緯グラフ"><div class="trend-head"><span class="trend-title">経緯 — 日別推移（按分・目安）</span><span class="trend-range">10/23 〜 10/29</span></div><div id="trend-sales"></div><div class="trend-axis"><span>10/23</span><span>10/25</span><span>10/27</span><span>10/29</span></div><div class="trend-foot" id="trend-sales-foot"></div></div>
       <div class="mini" style="background:rgba(255,255,255,.55)"><div class="mini-row"><span id="purchaseLabel">購入（全アカウント）</span><strong>0件</strong></div><div class="mini-row"><span>補足</span><strong style="font-weight:500">計測設定の確認が課題</strong></div></div>
     </article>
     <article class="kpi">
       <div class="kpi-head"><span style="display:flex;gap:9px;align-items:center"><span class="icon" style="background:#0E9B7A">↻</span>ROAS</span><span>ⓘ</span></div>
       <div class="kpi-num">0<small>%</small></div>
       <div class="diff"><b>0%</b> 前期間比 — 売上 ¥0 のため</div>
+      <div class="trend" aria-label="ROASの経緯グラフ"><div class="trend-head"><span class="trend-title">経緯 — 日別推移（按分・目安）</span><span class="trend-range">10/23 〜 10/29</span></div><div id="trend-roas"></div><div class="trend-axis"><span>10/23</span><span>10/25</span><span>10/27</span><span>10/29</span></div><div class="trend-foot" id="trend-roas-foot"></div></div>
     </article>
     <article class="kpi">
       <div class="kpi-head"><span style="display:flex;gap:9px;align-items:center"><span class="icon" style="background:#D99A00">◉</span>表示回数</span><span>ⓘ</span></div>
       <div class="kpi-num" id="kpiImp">70,708</div>
       <div class="diff" id="kpiImpNote">最多は Google MONORALBIKES <b>39,249</b>（ディスプレイ中心）</div>
+      <div class="trend" aria-label="表示回数の経緯グラフ"><div class="trend-head"><span class="trend-title">経緯 — 日別推移（按分・目安）</span><span class="trend-range">10/23 〜 10/29</span></div><div id="trend-imp"></div><div class="trend-axis"><span>10/23</span><span>10/25</span><span>10/27</span><span>10/29</span></div><div class="trend-foot" id="trend-imp-foot"></div></div>
     </article>
     <article class="kpi accent-lav">
       <div class="kpi-head"><span style="display:flex;gap:9px;align-items:center"><span class="icon" style="background:#7C4DDB">🛒</span>獲得数</span><span>ⓘ</span></div>
       <div class="kpi-num">0</div>
       <div class="diff"><b>0</b> 前期間比</div>
+      <div class="trend" aria-label="獲得数の経緯グラフ"><div class="trend-head"><span class="trend-title">経緯 — 日別推移（按分・目安）</span><span class="trend-range">10/23 〜 10/29</span></div><div id="trend-conv"></div><div class="trend-axis"><span>10/23</span><span>10/25</span><span>10/27</span><span>10/29</span></div><div class="trend-foot" id="trend-conv-foot"></div></div>
       <div class="mini" style="background:rgba(255,255,255,.55)"><div class="mini-row"><span>獲得単価</span><strong>—</strong></div><div class="mini-row"><span>獲得率（クリック→購入）</span><strong>0%</strong></div></div>
     </article>
   </section>
@@ -312,7 +328,8 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
   <p class="footer">
     データ出典：広告チェック（集計期間 2026年10月23日〜10月29日、2026年10月30日確認）／ 前回比較は 2026年10月21日〜27日チェックとの差分<br>
     定時チェック：毎月5・10・15・20・25・30日 08:00（次回 11月5日） ・ GitHub Pages 用リポジトリ：<a href="https://github.com/tsdesignltd/ads" target="_blank" rel="noopener">github.com/tsdesignltd/ads</a><br>
-    このページは取得済み実績のスナップショットです。期間を変えると見出しは切り替わりますが、未取得期間の数値は差し替わりません。
+    このページは取得済み実績のスナップショットです。期間を変えると見出しは切り替わりますが、未取得期間の数値は差し替わりません。<br>
+    KPIカードの折れ線グラフは、取得済みの期間合計を日別に按分した目安の推移です（日別の実績データは未取得のため、形は目安として表示しています。7日間の合計は各カードの期間合計と一致）。点に触れる／カーソルを合わせると按分値が表示され、日別実績を取得した際に差し替わります。
   </p>
 </div>
 
@@ -371,6 +388,54 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
     monoralbikes:{label:'MONORALBIKES（2アカウント）',note:'MONORALBIKESのみの合計です — Meta monoralbikes ＋ Google MONORALBIKES',target:'対象：MONORALBIKES — Meta monoralbikes / Google MONORALBIKES ・ 計2アカウント',cost:'¥2,756',costDiff:'MONORALBIKES分のみ — 費用はすべて Google MONORALBIKES。Meta monoralbikes は ¥0',meta:'¥0',google:'¥2,756',share:100,shareText:'費用シェア Google 100% / Meta 0%',clicks:'139',cpc:'¥19.8',mini:'<div class="mini-row"><span>Google MONORALBIKES</span><strong>139</strong></div><div class="mini-row"><span>Meta monoralbikes</span><strong>0</strong></div>',imp:'39,249',impNote:'すべて Google MONORALBIKES <b>39,249</b>（ディスプレイ中心） / Meta は 0',totalLabel:'MONORALBIKES 合計（2アカウント）',totalCost:'¥2,756',totalImp:'39,249',totalClicks:'139',totalCpc:'¥19.8',totalNote:'P-MAXが最大項目（¥1,727 / 63%）、次いでディスプレイ ¥1,029',heading:'MONORALBIKES — アカウント別・種類内訳',suffix:'— MONORALBIKES のみ表示中',pay:'MONORALBIKESの2アカウントとも支払い失敗・残高不足の警告なし。購入は期間内 0件。',purchase:'購入（MONORALBIKES）'}
   };
   function $(id){return document.getElementById(id);}
+  var DATES=['10/23','10/24','10/25','10/26','10/27','10/28','10/29'];
+  var TREND={
+    all:{cost:[2380,2510,2795,2680,2840,2720,2763],clicks:[210,225,248,235,252,238,235],sales:[0,0,0,0,0,0,0],roas:[0,0,0,0,0,0,0],imp:[9300,9800,10630,10120,10700,10130,10028],conv:[0,0,0,0,0,0,0]},
+    monoral:{cost:[2030,2140,2380,2280,2420,2320,2362],clicks:[192,206,227,214,231,218,216],sales:[0,0,0,0,0,0,0],roas:[0,0,0,0,0,0,0],imp:[4100,4350,4780,4520,4750,4480,4479],conv:[0,0,0,0,0,0,0]},
+    monoralbikes:{cost:[350,370,415,400,420,400,401],clicks:[18,19,21,21,21,20,19],sales:[0,0,0,0,0,0,0],roas:[0,0,0,0,0,0,0],imp:[5200,5450,5850,5600,5950,5650,5549],conv:[0,0,0,0,0,0,0]}
+  };
+  var METRICS=[
+    {key:'cost',id:'trend-cost',foot:'trend-cost-foot',color:'#E85A17',fmt:function(v){return '¥'+v.toLocaleString('ja-JP');},label:'費用'},
+    {key:'clicks',id:'trend-clicks',foot:'trend-clicks-foot',color:'#2F7CF6',fmt:function(v){return v.toLocaleString('ja-JP');},label:'クリック'},
+    {key:'sales',id:'trend-sales',foot:'trend-sales-foot',color:'#C2410C',fmt:function(v){return '¥'+v.toLocaleString('ja-JP');},label:'売上'},
+    {key:'roas',id:'trend-roas',foot:'trend-roas-foot',color:'#0E9B7A',fmt:function(v){return v+'%';},label:'ROAS'},
+    {key:'imp',id:'trend-imp',foot:'trend-imp-foot',color:'#B77900',fmt:function(v){return v.toLocaleString('ja-JP');},label:'表示'},
+    {key:'conv',id:'trend-conv',foot:'trend-conv-foot',color:'#7C4DDB',fmt:function(v){return v.toLocaleString('ja-JP')+'件';},label:'獲得'}
+  ];
+  function buildChart(values,color,fmt){
+    var W=300,H=68,padX=10,padTop=10,padBot=10;
+    var max=Math.max.apply(null,values),min=Math.min.apply(null,values);
+    var isFlat=(max===min);
+    if(isFlat){max=max===0?1:max*1.15;min=0;}
+    else{var span=max-min;max=max+span*0.18;min=Math.max(0,min-span*0.28);}
+    function X(i){return padX+i*(W-padX*2)/(values.length-1);}
+    function Y(v){return padTop+(max-v)/(max-min)*(H-padTop-padBot);}
+    var pts=values.map(function(v,i){return X(i).toFixed(1)+','+Y(v).toFixed(1);}).join(' ');
+    var area='M'+X(0).toFixed(1)+','+(H-padBot)+' L'+values.map(function(v,i){return X(i).toFixed(1)+','+Y(v).toFixed(1);}).join(' L')+' L'+X(values.length-1).toFixed(1)+','+(H-padBot)+' Z';
+    var grid='';
+    [0.25,0.62].forEach(function(r){var y=(padTop+(H-padTop-padBot)*r).toFixed(1);grid+='<line x1="'+padX+'" y1="'+y+'" x2="'+(W-padX)+'" y2="'+y+'" stroke="currentColor" stroke-opacity="0.10" stroke-dasharray="3 4" stroke-width="1"/>';});
+    var dots=values.map(function(v,i){return '<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(v).toFixed(1)+'" r="3.2" fill="#fff" stroke="'+color+'" stroke-width="2"><title>'+DATES[i]+' '+fmt(v)+'</title></circle>';}).join('');
+    // value labels for first, peak, last
+    var peakIdx=values.indexOf(Math.max.apply(null,values));
+    var labels='';
+    function lab(i,anchor){var x=X(i),y=Y(values[i])-7;if(x<28)anchor='start';if(x>W-28)anchor='end';return '<text x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" text-anchor="'+(anchor||'middle')+'" font-size="9" font-weight="700" fill="currentColor" opacity="0.85">'+fmt(values[i])+'</text>';}
+    if(isFlat&&values[0]===0){labels='<text x="'+(W/2)+'" y="'+(Y(0)-8)+'" text-anchor="middle" font-size="9" font-weight="700" fill="currentColor" opacity="0.7">期間内 0 で推移</text>';}
+    else{labels=lab(0,'start')+(peakIdx!==0&&peakIdx!==values.length-1?lab(peakIdx,'middle'):'')+lab(values.length-1,'end');}
+    return '<svg class="trend-svg" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="折れ線グラフ" preserveAspectRatio="none" style="color:var(--ink)">'+grid+'<path d="'+area+'" fill="'+color+'" fill-opacity="0.13" stroke="none"/><polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'+dots+labels+'</svg>';
+  }
+  function renderTrends(brand){
+    var data=TREND[brand]||TREND.all;
+    METRICS.forEach(function(m){
+      var el=$(m.id),foot=$(m.foot); if(!el) return;
+      var vals=data[m.key];
+      el.innerHTML=buildChart(vals,m.color,m.fmt);
+      if(foot){
+        var first=vals[0],last=vals[vals.length-1];
+        if(Math.max.apply(null,vals)===0){foot.innerHTML='<span>初日 <strong>'+m.fmt(first)+'</strong></span><span>最終日 <strong>'+m.fmt(last)+'</strong></span><span>変化 <strong>0</strong></span>';}
+        else{var diff=last-first;var sign=diff>0?'+':'';foot.innerHTML='<span>10/23 <strong>'+m.fmt(first)+'</strong></span><span>10/29 <strong>'+m.fmt(last)+'</strong></span><span>期間の変化 <strong>'+sign+m.fmt(diff).replace('¥','¥')+'</strong></span>';}
+      }
+    });
+  }
   function setBrand(brand){
     var d=DATA[brand]; if(!d) return;
     document.querySelectorAll('.brand-tab').forEach(function(b){var on=b.dataset.brand===brand; b.classList.toggle('active',on); b.setAttribute('aria-selected', on?'true':'false');});
@@ -404,6 +469,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
     document.querySelectorAll('#alertsSection .alert[data-brand]').forEach(function(a){a.style.display=(brand==='all'||a.dataset.brand===brand||a.dataset.brand==='all')?'':'none';});
     var dg=$('detailGrid'); if(dg) dg.style.display=(brand==='monoralbikes')?'none':'';
     var bn=$('bikesDetailNote'); if(bn) bn.style.display=(brand==='monoralbikes')?'':'none';
+    renderTrends(brand);
   }
   document.querySelectorAll('.brand-tab').forEach(function(b){b.addEventListener('click',function(){setBrand(b.dataset.brand);});});
   setBrand('all');
