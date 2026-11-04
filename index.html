@@ -94,12 +94,19 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
 .acct{font-weight:800;line-height:1.4}.plat{font-size:11px;font-weight:800;letter-spacing:.05em;padding:2px 7px;border-radius:99px;display:inline-block;margin-bottom:4px}
 .plat.meta{background:#E8F0FE;color:#175CD3}.plat.google{background:#FEF3C7;color:#93370D}
 .status{font-size:12px;font-weight:700}.status.on{color:#067647}.status.off{color:var(--red)}
-.breakdown{min-width:240px}
-.bd-row{display:grid;grid-template-columns:86px 1fr auto;gap:8px;align-items:center;padding:5px 0;font-size:12.5px}
+.breakdown{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 22px}
+.bd-item{min-width:0;font-size:12.5px}
+.bd-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .bd-name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bd-bar{height:7px;background:var(--line);border-radius:99px;overflow:hidden}.bd-bar i{display:block;height:100%;background:var(--orange)}
+.bd-cost{white-space:nowrap}
+.bd-bar{height:7px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:5px}.bd-bar i{display:block;height:100%;background:var(--orange)}
 .bd-bar i.b2{background:var(--blue)}.bd-bar i.b3{background:var(--teal)}.bd-bar i.b4{background:var(--amber)}
-.bd-meta{color:var(--muted);font-size:11px;white-space:nowrap}
+.bd-meta{color:var(--muted);font-size:11px;margin-top:4px;line-height:1.5}
+.bd-cap{font-size:11px;letter-spacing:.06em;color:var(--muted);font-weight:700;margin-bottom:8px}
+tr.acct-main td{border-bottom:none;padding-bottom:2px}
+td.bd-cell{padding:2px 10px 14px}
+@media(max-width:1100px){.breakdown{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.breakdown{grid-template-columns:1fr}}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
 .subcard{border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--card)}
 .subcard h3{margin:0 0 4px;font-size:14px}.subcard .cap{font-size:12px;color:var(--muted);margin-bottom:10px}
@@ -304,14 +311,14 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
     <div class="notice" id="ga4Missing"></div>
   </section>
 
-  <!-- ACCOUNT TABLE WITH BREAKDOWN COLUMN -->
+  <!-- ACCOUNT TABLE WITH BREAKDOWN ROWS -->
   <section class="section" id="accountSection">
     <h2 id="accountHeading">アカウント別 — 広告種類の内訳つき</h2>
-    <p class="lead" id="accountLead">各アカウントの行の中に、広告種類（Google）／目的（Meta）の内訳を費用シェアのバーと％で表示しています。アカウント名を押すと各管理画面が開きます。</p>
+    <p class="lead" id="accountLead">各アカウントの実績行の下に、広告種類（Google）／目的（Meta）の内訳を費用シェアのバーと％で表示しています。アカウント名を押すと各管理画面が開きます。</p>
 
     <div class="table-wrap">
       <table>
-        <thead><tr><th>アカウント</th><th>状態</th><th class="num">費用</th><th class="num">表示</th><th class="num">クリック</th><th class="num">平均CPC</th><th class="num">購入</th><th style="min-width:260px">広告種類の内訳（費用 / シェア / 表示 / クリック / CPC）</th></tr></thead>
+        <thead><tr><th>アカウント</th><th>状態</th><th class="num">費用</th><th class="num">表示</th><th class="num">クリック</th><th class="num">平均CPC</th><th class="num">購入</th></tr></thead>
         <tbody id="acctTbody"></tbody>
       </table>
     </div>
@@ -582,8 +589,10 @@ var PERIODS = {"d30": {"periodDays": 30, "start": "2026-10-05", "end": "2026-11-
     return '<div class="breakdown">' + a.breakdowns.map(function(bd, i){
       var share = a.cost ? Math.round(bd.cost / a.cost * 100) : 0;
       var meta = compact ? yen(bd.cost) + ' ' + share + '%' :
-        '<strong>' + yen(bd.cost) + '</strong> ' + share + '%<br><span class="bd-meta">表示 ' + num(bd.impressions) + ' / クリック ' + (bd.clicks == null ? '—' : num(bd.clicks)) + ' / CPC ' + cpc(bd.avgCpc) + '</span>';
-      return '<div class="bd-row"><span class="bd-name" title="' + esc(bd.label) + '">' + esc(shortLabel(bd.label)) + '</span><span class="bd-bar"><i class="' + (colors[i % 4]) + '" style="width:' + share + '%"></i></span><span>' + meta + '</span></div>';
+        '<strong>' + yen(bd.cost) + '</strong> ' + share + '%';
+      var detail = compact ? '' :
+        '<div class="bd-meta">表示 ' + num(bd.impressions) + ' ・ クリック ' + (bd.clicks == null ? '—' : num(bd.clicks)) + ' ・ 平均CPC ' + cpc(bd.avgCpc) + ' ・ 購入 ' + (bd.purchases == null ? '—' : num(bd.purchases)) + '</div>';
+      return '<div class="bd-item"><div class="bd-head"><span class="bd-name" title="' + esc(bd.label) + '">' + esc(shortLabel(bd.label)) + '</span><span class="bd-cost">' + meta + '</span></div><div class="bd-bar"><i class="' + (colors[i % 4]) + '" style="width:' + share + '%"></i></div>' + detail + '</div>';
     }).join('') + '</div>';
   }
   function statusCls(a){ return a.status.indexOf('実質停止') >= 0 ? 'off' : 'on'; }
@@ -591,14 +600,15 @@ var PERIODS = {"d30": {"periodDays": 30, "start": "2026-10-05", "end": "2026-11-
     var g = P.brands[cur.brand];
     var rows = visAccounts(P).map(function(a){
       var link = LINKS[a.platform + '_' + a.brand];
-      return '<tr>' +
+      return '<tr class="acct-main">' +
         '<td><span class="plat ' + a.platform + '">' + a.platform.toUpperCase() + '</span><div class="acct"><a href="' + link + '" target="_blank" rel="noopener">' + esc(a.name) + ' ↗</a></div>' + (a.dailyBudget ? '<div class="budget-note">日予算 ' + yen(a.dailyBudget) + '</div>' : '') + '</td>' +
         '<td><span class="status ' + statusCls(a) + '">● ' + esc(a.status) + '</span></td>' +
-        '<td class="num"><strong>' + yen(a.cost) + '</strong></td><td class="num">' + num(a.impressions) + '</td><td class="num">' + (a.clicks == null ? '—' : num(a.clicks)) + '</td><td class="num">' + cpc(a.avgCpc) + '</td><td class="num">' + (a.purchases == null ? '—' : num(a.purchases)) + '</td>' +
-        '<td>' + breakdownHtml(a, false) + '</td></tr>';
+        '<td class="num"><strong>' + yen(a.cost) + '</strong></td><td class="num">' + num(a.impressions) + '</td><td class="num">' + (a.clicks == null ? '—' : num(a.clicks)) + '</td><td class="num">' + cpc(a.avgCpc) + '</td><td class="num">' + (a.purchases == null ? '—' : num(a.purchases)) + '</td></tr>' +
+        '<tr><td class="bd-cell" colspan="7"><div class="bd-cap">' + esc(a.breakdownTitle || '内訳') + '（費用 / シェア / 表示 / クリック / CPC）</div>' + breakdownHtml(a, false) + '</td></tr>';
     }).join('');
     var totalLabel = cur.brand === 'all' ? '合計（4アカウント）' : BRAND_NAME[cur.brand] + ' 合計（2アカウント）';
-    rows += '<tr style="background:var(--card2);font-weight:800"><td colspan="2">' + totalLabel + '</td><td class="num">' + yen(g.cost) + '</td><td class="num">' + num(g.impressions) + '</td><td class="num">' + num(g.clicks) + '</td><td class="num">' + cpc(g.avgCpc) + '</td><td class="num">' + (g.purchasesComplete ? num(g.purchases) : '—') + '</td><td style="font-weight:500;font-size:12.5px;color:var(--muted)">' + (g.largestBreakdown ? esc(g.largestBreakdown.label) + 'が費用の最大項目（' + yen(g.largestBreakdown.cost) + '）' : '') + '</td></tr>';
+    rows += '<tr style="background:var(--card2);font-weight:800"><td colspan="2">' + totalLabel + '</td><td class="num">' + yen(g.cost) + '</td><td class="num">' + num(g.impressions) + '</td><td class="num">' + num(g.clicks) + '</td><td class="num">' + cpc(g.avgCpc) + '</td><td class="num">' + (g.purchasesComplete ? num(g.purchases) : '—') + '</td></tr>';
+    if (g.largestBreakdown){ rows += '<tr><td colspan="7" style="font-size:12.5px;color:var(--muted)">' + esc(g.largestBreakdown.label) + 'が費用の最大項目（' + yen(g.largestBreakdown.cost) + '）</td></tr>'; }
     $('acctTbody').innerHTML = rows;
     $('accountHeading').textContent = cur.brand === 'all' ? 'アカウント別 — 広告種類の内訳つき' : BRAND_NAME[cur.brand] + ' — アカウント別・種類内訳';
     $('mobileCards').innerHTML = visAccounts(P).map(function(a){
